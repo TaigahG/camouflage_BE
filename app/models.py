@@ -43,3 +43,20 @@ class Item(Base):
     item_type = Column(String, nullable=False)
     item_3d_model_url = Column(String, nullable=False)
     thumbnail_url = Column(String, nullable=True)
+
+class AppliedPattern(Base):
+    __tablename__ = "applied_patterns"
+    
+    applied_id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
+    collection_id = Column(Integer, ForeignKey("collections.collection_id", ondelete="CASCADE"), nullable=False)
+    item_id = Column(Integer, ForeignKey("items.item_id", ondelete="SET NULL"), nullable=True)  # Can be null if item deleted
+    
+    applied_model_url = Column(String, nullable=False)  
+    thumbnail_url = Column(String, nullable=True) 
+    
+    title = Column(String, nullable=True) 
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    user = relationship("User", back_populates="applied_patterns")
+    collection = relationship("Collection", back_populates="applied_patterns")
