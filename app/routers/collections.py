@@ -4,7 +4,7 @@ from typing import List
 
 from .. import crud, schemas
 from ..database import get_db
-from ..storage import upload_image, delete_image
+from ..storage import upload_base_image, delete_base_images, delete_pattern
 
 router = APIRouter(prefix="/collections", tags=["collections"])
 
@@ -57,15 +57,16 @@ async def create_collection(
     db_collection = crud.create_collections(db, user_id, collection_data)
 
     for idx, image in enumerate(images, start=1):
-        content = image.read()
+        content = await image.read()
 
-        image_url = await upload_image(
-            file = content,
-            filename=image.filename,
-            folder="base_images"
-        )
-
-        if not image_url:
+        try:
+            image_url = upload_base_image(
+                file_content=content,
+                filename=image.filename,
+                user_id=user_id,
+                collection_id=db_collection.collection_id
+            )
+        except Exception:
             crud.delete_collections(db, db_collection.collection_id)
             raise HTTPException(status_code=500, detail="Failed to upload images to storage")
         
@@ -94,16 +95,15 @@ def get_user_collection(user_id: int, db:Session = Depends(get_db)):
     return collection
 
 @router.delete("/{collection_id}", status_code=204)
-async def delete_collection(collection_id: int, db:Session = Depends(get_db)):
+def delete_collection(collection_id: int, db:Session = Depends(get_db)):
     db_collection = crud.get_collections(db, collection_id=collection_id)
-    if not collection_id:
+    if not db_collection:
         raise HTTPException(status_code=404, detail="collection not found")
     
-    for base_image in db_collection.base_images:
-        await delete_image(base_image.image_url)
+    delete_base_images(user_id=db_collection.user_id, collection_id=collection_id)
 
     if db_collection.pattern_image_url:
-        await delete_image(db_collection.pattern_image_url)
+        delete_pattern(user_id=db_collection.user_id, collection_id=collection_id)
 
     crud.delete_collections(db, collection_id=collection_id)
     return None
