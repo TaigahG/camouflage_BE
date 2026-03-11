@@ -1,21 +1,23 @@
+import os
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from typing import List
 
 from .. import crud, schemas
 from ..database import get_db
-from ..storage import upload_base_image, delete_base_images, delete_pattern
+from ..auth import get_current_user
+from ..schemas import UserInfo
+from ..storage import upload_base_image, upload_pattern, delete_base_images, delete_pattern
 
 router = APIRouter(prefix="/collections", tags=["collections"])
 
 
-
 @router.post("/", response_model=schemas.CollectionResponse, status_code=201)
 async def create_collection(
-    user_id: int = Form(...),
     title: str = Form(...),
     images: List[UploadFile] = File(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: UserInfo = Depends(get_current_user),
 ):
     
     '''
@@ -39,10 +41,10 @@ async def create_collection(
     5. Upload each image to Supabase Storage
     6. Save image URLs to database
     7. (TODO) Trigger AI pattern generation
+    8. Upload the generated pattern to Supabase Storage and save URL to database
+    9. Return Collection Data (Generated Pattern URL, and Pattern Name)
     """
-    db_user = crud.get_user(db, user_id)
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
+    user_id = current_user.id
     if not(1<= len(images) <= 9):
         raise HTTPException(status_code=404, detail="Must upload between 1-9 images")
     allowed_types = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
@@ -72,10 +74,19 @@ async def create_collection(
         
         crud.create_image(db, db_collection.collection_id, image_url, idx)
 
-    print(f"[STUB] Would generate pattern for collection {db_collection.collection_id}")
-    print(f"[STUB] Base images uploaded: {len(images)}")
-    print(f"[STUB] User ID: {user_id}, Title: {title}")
-    
+    # TODO: Replace with actual AI pattern generation logic
+    assets_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets")
+    dummy_pattern_path = os.path.join(assets_dir, "pattern_1.jpg")
+    with open(dummy_pattern_path, "rb") as f:
+        pattern_bytes = f.read()
+
+    pattern_url = upload_pattern(
+        file_content=pattern_bytes,
+        collection_id=db_collection.collection_id,
+        user_id=user_id
+    )
+    crud.update_collection_pattern(db, db_collection.collection_id, pattern_url)
+
     db.refresh(db_collection)
     return db_collection
 
@@ -86,20 +97,26 @@ def get_collection(collection_id: int, db:Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="collection not found")
     return db_collection
 
-@router.get("/user/{user_id}", response_model=List[schemas.CollectionResponse])
-def get_user_collection(user_id: int, db:Session = Depends(get_db)):
-    db_user = crud.get_user(db, user_id=user_id)
-    if not db_user:
-        raise HTTPException(status_code=404, detail="user not found")
-    collection = crud.get_user_collections(db, user_id=user_id)
-    return collection
+@router.get("/me", response_model=List[schemas.CollectionResponse])
+def get_my_collections(
+    db: Session = Depends(get_db),
+    current_user: UserInfo = Depends(get_current_user),
+):
+    """Get all collections belonging to the authenticated user."""
+    return crud.get_user_collections(db, user_id=current_user.id)
 
 @router.delete("/{collection_id}", status_code=204)
-def delete_collection(collection_id: int, db:Session = Depends(get_db)):
+def delete_collection(
+    collection_id: int,
+    db: Session = Depends(get_db),
+    current_user: UserInfo = Depends(get_current_user),
+):
     db_collection = crud.get_collections(db, collection_id=collection_id)
     if not db_collection:
         raise HTTPException(status_code=404, detail="collection not found")
-    
+    if db_collection.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this collection")
+
     delete_base_images(user_id=db_collection.user_id, collection_id=collection_id)
 
     if db_collection.pattern_image_url:

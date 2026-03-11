@@ -8,6 +8,8 @@ load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+# Service role key bypasses RLS — required for server-side storage uploads
+SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
 # 3 Buckets
 BUCKET_BASE_IMAGES = os.getenv("BUCKET_BASE_IMAGES", "camouflage-images")
@@ -17,10 +19,12 @@ BUCKET_APPLIED_MODELS = os.getenv("BUCKET_APPLIED_MODELS", "camouflage-applied-m
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise ValueError("SUPABASE_URL and SUPABASE_KEY must be set in environment variables")
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+# Use service role key for storage if available, otherwise fall back to anon key
+_storage_key = SUPABASE_SERVICE_ROLE_KEY or SUPABASE_KEY
+supabase: Client = create_client(SUPABASE_URL, _storage_key)
 
 
-def upload_base_image(file_content: bytes, filename: str, user_id: int, collection_id: int) -> str:
+def upload_base_image(file_content: bytes, filename: str, user_id: uuid.UUID, collection_id: int) -> str:
     """
     Upload a base/environment image to Supabase Storage
     
@@ -56,7 +60,7 @@ def upload_base_image(file_content: bytes, filename: str, user_id: int, collecti
         raise
 
 
-def upload_pattern(file_content: bytes, collection_id: int, user_id: int) -> str:
+def upload_pattern(file_content: bytes, collection_id: int, user_id: uuid.UUID) -> str:
     """
     Upload AI-generated pattern to Supabase Storage
     
@@ -92,7 +96,7 @@ def upload_pattern(file_content: bytes, collection_id: int, user_id: int) -> str
 def upload_applied_model(
     file_content: bytes, 
     filename: str, 
-    user_id: int, 
+    user_id: uuid.UUID,
     applied_id: int,
     file_type: str = "model"  
 ) -> str:
@@ -138,7 +142,7 @@ def upload_applied_model(
         raise
 
 
-def delete_base_images(user_id: int, collection_id: int) -> bool:
+def delete_base_images(user_id: uuid.UUID, collection_id: int) -> bool:
     """
     Delete all base images for a collection
     
@@ -166,7 +170,7 @@ def delete_base_images(user_id: int, collection_id: int) -> bool:
         return False
 
 
-def delete_pattern(user_id: int, collection_id: int) -> bool:
+def delete_pattern(user_id: uuid.UUID, collection_id: int) -> bool:
     """
     Delete AI-generated pattern for a collection
     
@@ -189,7 +193,7 @@ def delete_pattern(user_id: int, collection_id: int) -> bool:
         return False
 
 
-def delete_applied_model(user_id: int, applied_id: int) -> bool:
+def delete_applied_model(user_id: uuid.UUID, applied_id: int) -> bool:
     """
     Delete applied 3D model and its thumbnail
     

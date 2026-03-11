@@ -1,29 +1,24 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime
+import uuid
 from .database import Base
 
-class User(Base):
-    __tablename__ = "users"
-
-    user_id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True, nullable=False)
-    email = Column(String, unique=True, index=True, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-    collections = relationship("Collection", back_populates="user", cascade="all, delete-orphan")
+# User management is handled by Supabase auth.users.
+# user_id is a UUID string referencing auth.users.id.
 
 class Collection(Base):
     __tablename__ = "collections"
 
     collection_id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(UUID(as_uuid=True), nullable=False, index=True)  # UUID from auth.users
     title = Column(String, index=True, nullable=False)
     pattern_image_url = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    user = relationship("User", back_populates="collections")
     base_images = relationship("BaseImage", back_populates="collection", cascade="all, delete-orphan")
+    applied_patterns = relationship("AppliedPattern", back_populates="collection", cascade="all, delete-orphan")
 
 class BaseImage(Base):
     __tablename__ = "base_images"
@@ -48,7 +43,7 @@ class AppliedPattern(Base):
     __tablename__ = "applied_patterns"
     
     applied_id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(UUID(as_uuid=True), nullable=False, index=True)  # UUID from auth.users
     collection_id = Column(Integer, ForeignKey("collections.collection_id", ondelete="CASCADE"), nullable=False)
     item_id = Column(Integer, ForeignKey("items.item_id", ondelete="SET NULL"), nullable=True)  # Can be null if item deleted
     
@@ -58,5 +53,4 @@ class AppliedPattern(Base):
     title = Column(String, nullable=True) 
     created_at = Column(DateTime, default=datetime.utcnow)
     
-    user = relationship("User", back_populates="applied_patterns")
     collection = relationship("Collection", back_populates="applied_patterns")

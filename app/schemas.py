@@ -1,19 +1,14 @@
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 from datetime import datetime
+import uuid
 
-class UserCreate(BaseModel):
-    username: str
-    email: EmailStr
 
-class UserResponse(BaseModel):
-    user_id: int
-    username: str
+class UserInfo(BaseModel):
+    """Authenticated user info extracted from the Supabase JWT."""
+    id: uuid.UUID  # UUID from auth.users
     email: str
-    created_at: datetime
 
-    class Config:
-        from_attributes = True
 
 class BaseImageResponse(BaseModel):
     image_id: int
@@ -30,7 +25,7 @@ class CollectionCreate(BaseModel):
 
 class CollectionResponse(BaseModel):
     collection_id: int
-    user_id: int
+    user_id: uuid.UUID  # UUID from auth.users
     title: str
     pattern_image_url: Optional[str]
     created_at: datetime
