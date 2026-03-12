@@ -47,3 +47,21 @@ class ItemResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class AppliedPatternCreate(BaseModel):
+    collection_id: int
+    item_id: int
+    title: Optional[str] = None
+
+class AppliedPatternResponse(BaseModel):
+    applied_id: int
+    user_id: int
+    collection_id: int
+    item_id: Optional[int]
+    applied_model_url: str
+    thumbnail_url: Optional[str]
+    title: Optional[str]
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
