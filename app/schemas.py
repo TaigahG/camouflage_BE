@@ -55,7 +55,7 @@ class AppliedPatternCreate(BaseModel):
 
 class AppliedPatternResponse(BaseModel):
     applied_id: int
-    user_id: int
+    user_id: uuid.UUID
     collection_id: int
     item_id: Optional[int]
     applied_model_url: str

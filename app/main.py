@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
 from sqlalchemy import inspect
 from . import models 
-from .routers import users, collections, items, images, trimesh_router
+from .routers import users, collections, items, images, trimesh_router, applied_patterns
 
 Base.metadata.create_all(bind=engine)
 
@@ -27,6 +27,7 @@ app.include_router(collections.router, prefix="/api")
 app.include_router(items.router, prefix="/api")
 app.include_router(images.router, prefix="/api")
 app.include_router(trimesh_router.router, prefix="/api")
+app.include_router(applied_patterns.router, prefix="/api")
 @app.get("/")
 def root():
     """Root endpoint - API information"""

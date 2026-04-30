@@ -69,3 +69,47 @@ def delete_item(db: Session, item_id: int):
         db.commit()
         return True
     return False
+
+# Applied Patterns
+def create_applied_pattern(
+    db: Session,
+    user_id: uuid.UUID,
+    collection_id: int,
+    applied_model_url: str,
+    thumbnail_url: Optional[str] = None,
+    title: Optional[str] = None,
+    item_id: Optional[int] = None,
+) -> models.AppliedPattern:
+    db_applied = models.AppliedPattern(
+        user_id=user_id,
+        collection_id=collection_id,
+        item_id=item_id,
+        applied_model_url=applied_model_url,
+        thumbnail_url=thumbnail_url,
+        title=title,
+    )
+    db.add(db_applied)
+    db.commit()
+    db.refresh(db_applied)
+    return db_applied
+
+def get_applied_pattern(db: Session, applied_id: int) -> Optional[models.AppliedPattern]:
+    return db.query(models.AppliedPattern).filter(models.AppliedPattern.applied_id == applied_id).first()
+
+def get_user_applied_patterns(db: Session, user_id: uuid.UUID) -> List[models.AppliedPattern]:
+    return db.query(models.AppliedPattern).filter(
+        models.AppliedPattern.user_id == user_id
+    ).order_by(models.AppliedPattern.created_at.desc()).all()
+
+def get_collection_applied_patterns(db: Session, collection_id: int) -> List[models.AppliedPattern]:
+    return db.query(models.AppliedPattern).filter(
+        models.AppliedPattern.collection_id == collection_id
+    ).order_by(models.AppliedPattern.created_at.desc()).all()
+
+def delete_applied_pattern(db: Session, applied_id: int) -> bool:
+    db_applied = get_applied_pattern(db, applied_id)
+    if db_applied:
+        db.delete(db_applied)
+        db.commit()
+        return True
+    return False

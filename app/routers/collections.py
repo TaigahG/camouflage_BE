@@ -90,13 +90,6 @@ async def create_collection(
     db.refresh(db_collection)
     return db_collection
 
-@router.get("/{collection_id}", response_model=schemas.CollectionResponse)
-def get_collection(collection_id: int, db:Session = Depends(get_db)):
-    db_collection = crud.get_collections(db, collection_id=collection_id)
-    if not collection_id:
-        raise HTTPException(status_code=404, detail="collection not found")
-    return db_collection
-
 @router.get("/me", response_model=List[schemas.CollectionResponse])
 def get_my_collections(
     db: Session = Depends(get_db),
@@ -104,6 +97,13 @@ def get_my_collections(
 ):
     """Get all collections belonging to the authenticated user."""
     return crud.get_user_collections(db, user_id=current_user.id)
+
+@router.get("/{collection_id}", response_model=schemas.CollectionResponse)
+def get_collection(collection_id: int, db:Session = Depends(get_db)):
+    db_collection = crud.get_collections(db, collection_id=collection_id)
+    if not collection_id:
+        raise HTTPException(status_code=404, detail="collection not found")
+    return db_collection
 
 @router.delete("/{collection_id}", status_code=204)
 def delete_collection(

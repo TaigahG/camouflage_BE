@@ -44,7 +44,7 @@ class AppliedPattern(Base):
     
     applied_id = Column(Integer, primary_key=True, index=True)
     user_id = Column(UUID(as_uuid=True), nullable=False, index=True)  # UUID from auth.users
-    collection_id = Column(Integer, ForeignKey("collections.collection_id", ondelete="CASCADE"), nullable=False)
+    collection_id = Column(Integer, ForeignKey("collections.collection_id", ondelete="SET NULL"), nullable=True)
     item_id = Column(Integer, ForeignKey("items.item_id", ondelete="SET NULL"), nullable=True)  # Can be null if item deleted
     
     applied_model_url = Column(String, nullable=False)  

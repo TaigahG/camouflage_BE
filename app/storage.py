@@ -98,6 +98,7 @@ def upload_applied_model(
     filename: str, 
     user_id: uuid.UUID,
     applied_id: int,
+    pattern_id: int,
     file_type: str = "model"  
 ) -> str:
     """
@@ -108,6 +109,7 @@ def upload_applied_model(
         filename: Original filename
         user_id: User ID for folder structure
         applied_id: Applied pattern ID
+        pattern_id: Pattern/Collection ID for folder structure
         file_type: "model" or "thumbnail"
     
     Returns:
@@ -123,7 +125,8 @@ def upload_applied_model(
         content_type = "model/gltf-binary" if file_extension == "glb" else "model/gltf+json"
         unique_filename = f"applied_{applied_id}.{file_extension}"
     
-    storage_path = f"user_{user_id}/{unique_filename}"
+    # Path structure: user_{id}/3d/{pattern_obj_id}/filename
+    storage_path = f"user_{user_id}/3d/{pattern_id}/{unique_filename}"
     
     try:
         supabase.storage.from_(BUCKET_APPLIED_MODELS).upload(
