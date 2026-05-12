@@ -1,20 +1,52 @@
+"""
+app/main.py
+
+WHAT CHANGED:
+    Added a 'lifespan' context manager that loads the AI model
+    when the server starts and cleans up when it stops.
+
+WHY LIFESPAN (not @app.on_event)?
+    FastAPI's @app.on_event("startup") is deprecated.
+    The modern approach is the 'lifespan' async context manager.
+    Everything BEFORE 'yield' runs at startup.
+    Everything AFTER 'yield' runs at shutdown.
+"""
+
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
 from sqlalchemy import inspect
-from . import models 
+from . import models
 from .routers import users, collections, items, images, trimesh_router, applied_patterns
 
-Base.metadata.create_all(bind=engine)
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+
+    try:
+        from .services.pattern_service import pattern_service
+        pattern_service.startup()
+    except Exception as e:
+        print(f"[WARNING] AI model failed to load: {e}")
+        print("[WARNING] Pattern generation will be unavailable.")
+        print("[WARNING] All other API endpoints will work normally.")
+
+    yield  
+
+    # ── SHUTDOWN ──
+    print("[Server] Shutting down...")
 
 app = FastAPI(
     title="Camouflage Pattern Generator API",
     description="API for generating and managing AI-powered camouflage patterns with Supabase",
     version="1.0.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
+    lifespan=lifespan, 
 )
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -28,14 +60,22 @@ app.include_router(items.router, prefix="/api")
 app.include_router(images.router, prefix="/api")
 app.include_router(trimesh_router.router, prefix="/api")
 app.include_router(applied_patterns.router, prefix="/api")
+
 @app.get("/")
 def root():
     """Root endpoint - API information"""
+    try:
+        from .services.pattern_service import pattern_service
+        ai_status = "ready" if pattern_service.is_ready else "unavailable"
+    except Exception:
+        ai_status = "not loaded"
+
     return {
         "message": "Camouflage Pattern Generator API",
         "version": "1.0.0",
         "docs": "/docs",
         "database": "Supabase PostgreSQL",
         "storage": "Supabase Storage",
+        "ai_model": ai_status,
         "status": "operational"
     }

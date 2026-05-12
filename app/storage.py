@@ -8,10 +8,8 @@ load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-# Service role key bypasses RLS — required for server-side storage uploads
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
-# 3 Buckets
 BUCKET_BASE_IMAGES = os.getenv("BUCKET_BASE_IMAGES", "camouflage-images")
 BUCKET_PATTERNS = os.getenv("BUCKET_PATTERNS", "camouflage-patterns")
 BUCKET_APPLIED_MODELS = os.getenv("BUCKET_APPLIED_MODELS", "camouflage-applied-models")
@@ -19,7 +17,6 @@ BUCKET_APPLIED_MODELS = os.getenv("BUCKET_APPLIED_MODELS", "camouflage-applied-m
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise ValueError("SUPABASE_URL and SUPABASE_KEY must be set in environment variables")
 
-# Use service role key for storage if available, otherwise fall back to anon key
 _storage_key = SUPABASE_SERVICE_ROLE_KEY or SUPABASE_KEY
 supabase: Client = create_client(SUPABASE_URL, _storage_key)
 
@@ -77,10 +74,16 @@ def upload_pattern(file_content: bytes, collection_id: int, user_id: uuid.UUID) 
     storage_path = f"user_{user_id}/{filename}"
     
     try:
+        # Try to remove existing file first (upsert can be unreliable across versions)
+        try:
+            supabase.storage.from_(BUCKET_PATTERNS).remove([storage_path])
+        except Exception:
+            pass  # File may not exist yet
+
         supabase.storage.from_(BUCKET_PATTERNS).upload(
             path=storage_path,
             file=file_content,
-            file_options={"content-type": "image/jpeg", "upsert": "true"}  # Overwrite if exists
+            file_options={"content-type": "image/png"}
         )
         
         public_url = supabase.storage.from_(BUCKET_PATTERNS).get_public_url(storage_path)
@@ -237,7 +240,6 @@ def delete_user_storage(user_id: int) -> bool:
     folder_path = f"user_{user_id}"
     success = True
     
-    # Delete from base images bucket
     try:
         files = supabase.storage.from_(BUCKET_BASE_IMAGES).list(folder_path)
         if files:
@@ -259,7 +261,6 @@ def delete_user_storage(user_id: int) -> bool:
         print(f"Error deleting patterns: {e}")
         success = False
     
-    # Delete from applied models bucket
     try:
         files = supabase.storage.from_(BUCKET_APPLIED_MODELS).list(folder_path)
         if files:

@@ -12,7 +12,11 @@ if not DATABASE_URL:
 
 print(f"Connecting to database: {DATABASE_URL[:50]}...") 
 
-engine = create_engine(DATABASE_URL, connect_args={"sslmode": "require"})
+engine = create_engine(
+    DATABASE_URL,
+    connect_args={"sslmode": "require"},
+    pool_pre_ping=True,  # reconnect stale connections (fixes timeout during long AI generation)
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
