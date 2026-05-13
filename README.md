@@ -30,18 +30,12 @@ FastAPI-based backend for the CamoCam AI-powered camouflage pattern generator. H
 ### System Requirements
 
 - **Python**: 3.10 or higher
-- **GPU** (recommended): 
-  - NVIDIA CUDA 11.8+ with cuDNN 8.x for fastest performance
-  - Apple Silicon (M1/M3) with MPS support
-  - CPU: Works but slow (~1-2 min per generation)
 - **Disk Space**: ~20 GB for models (SD3 ~5GB + SegFormer + others)
-- **RAM**: 16 GB minimum, 32 GB recommended
 
 ### External Services
 
 - **Supabase Account**: For PostgreSQL, Storage, and Authentication
 - **HuggingFace Token**: For downloading SD3 model
-- **GPU** (optional): For significantly faster inference
 
 ## Installation
 
@@ -301,9 +295,6 @@ items (
    ↓
 5. Export as new GLB file
 ```
-
-**Time**: ~5-10 seconds
-
 
 ## Related
 
