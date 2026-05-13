@@ -12,3 +12,4 @@ open3d
 trimesh
 pygltflib
 numpy
+transformers

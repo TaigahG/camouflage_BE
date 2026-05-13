@@ -53,7 +53,7 @@ class PatternService:
         """
         try:
             async with httpx.AsyncClient() as client:
-                response = await client.get(url, timeout=30.0)
+                response = await client.get(url, timeout=120.0)
                 response.raise_for_status()
                 image = Image.open(io.BytesIO(response.content))
                 return image

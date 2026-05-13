@@ -150,6 +150,42 @@ def upload_applied_model(
         raise
 
 
+def upload_applied_outfit(
+    file_content: bytes,
+    user_id: uuid.UUID,
+    collection_id: int,
+    applied_id: int,
+    file_extension: str = "png",
+) -> str:
+    """
+    Upload a 2D patterned-outfit image (output of /retexture-outfit) to Supabase Storage.
+
+    Path mirrors the 3D one but under 2d/:
+        user_{user_id}/collection_{collection_id}/2d/model_{applied_id}/object_{applied_id}.{ext}
+    """
+    content_type = f"image/{file_extension}"
+    unique_filename = f"object_{applied_id}.{file_extension}"
+    storage_path = (
+        f"user_{user_id}/collection_{collection_id}/2d/"
+        f"model_{applied_id}/{unique_filename}"
+    )
+
+    try:
+        supabase.storage.from_(BUCKET_APPLIED_MODELS).upload(
+            path=storage_path,
+            file=file_content,
+            file_options={"content-type": content_type},
+        )
+
+        public_url = supabase.storage.from_(BUCKET_APPLIED_MODELS).get_public_url(storage_path)
+        print(f"Applied outfit uploaded: {storage_path}")
+        return public_url
+
+    except Exception as e:
+        print(f"Error uploading applied outfit: {e}")
+        raise
+
+
 def delete_base_images(user_id: uuid.UUID, collection_id: int) -> bool:
     """
     Delete all base images for a collection

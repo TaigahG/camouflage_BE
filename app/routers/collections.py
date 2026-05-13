@@ -118,7 +118,7 @@ async def create_collection(
 @router.post("/{collection_id}/generate", response_model=schemas.CollectionResponse)
 async def regenerate_pattern(
     collection_id: int,
-    apply_segmentation: bool = True,
+    apply_segmentation: bool = False,
     db: Session = Depends(get_db),
     current_user: UserInfo = Depends(get_current_user),
 ):

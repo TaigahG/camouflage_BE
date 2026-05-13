@@ -18,7 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
 from sqlalchemy import inspect
 from . import models
-from .routers import users, collections, items, images, trimesh_router, applied_patterns
+from .routers import users, collections, items, images, trimesh_router, applied_patterns, retexture
 
 
 @asynccontextmanager
@@ -32,6 +32,13 @@ async def lifespan(app: FastAPI):
         print(f"[WARNING] AI model failed to load: {e}")
         print("[WARNING] Pattern generation will be unavailable.")
         print("[WARNING] All other API endpoints will work normally.")
+
+    try:
+        from .services.retexture_service import retexture_service
+        retexture_service.preload()
+    except Exception as e:
+        print(f"[WARNING] Retexture preload failed: {e}")
+        print("[WARNING] /retexture-clothes will lazy-load on first request.")
 
     yield  
 
@@ -60,6 +67,7 @@ app.include_router(items.router, prefix="/api")
 app.include_router(images.router, prefix="/api")
 app.include_router(trimesh_router.router, prefix="/api")
 app.include_router(applied_patterns.router, prefix="/api")
+app.include_router(retexture.router, prefix="/api")
 
 @app.get("/")
 def root():
