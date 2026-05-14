@@ -1,11 +1,10 @@
 # CamoCam Backend
 
-FastAPI-based backend for the CamoCam AI-powered camouflage pattern generator. Handles pattern generation, 3D model texturing, and AR retexturing using Stable Diffusion 3 and advanced image processing.
+FastAPI-based backend for the CamoCam AI-powered camouflage pattern generator. Handles pattern generation and 3D model texturing using Stable Diffusion 3 and advanced image processing.
 
 ## Features
 
 - **AI Pattern Generation**: Generate unique camouflage patterns from environment images using Stable Diffusion 3
-- **Smart Retexturing**: Apply patterns to clothing photos using SegFormer segmentation + inpainting
 - **3D Texturing**: Apply patterns to GLB models with UV mapping support
 - **RESTful API**: Comprehensive FastAPI with automatic interactive docs
 - **Secure Authentication**: Supabase JWT token validation
@@ -22,7 +21,6 @@ FastAPI-based backend for the CamoCam AI-powered camouflage pattern generator. H
 | **AI Model** | Stable Diffusion 3 (diffusers) |
 | **Image Processing** | PIL, scikit-image, numpy |
 | **3D Processing** | Trimesh, xatlas, Open3D |
-| **Segmentation** | SegFormer (transformers) |
 | **Authentication** | Supabase JWT |
 
 ## Prerequisites
@@ -30,7 +28,7 @@ FastAPI-based backend for the CamoCam AI-powered camouflage pattern generator. H
 ### System Requirements
 
 - **Python**: 3.10 or higher
-- **Disk Space**: ~20 GB for models (SD3 ~5GB + SegFormer + others)
+- **Disk Space**: ~10 GB for models (SD3 ~5GB + others)
 
 ### External Services
 
@@ -143,18 +141,15 @@ app/
 │   ├── trimesh_router.py   # 3D model texturing
 │   ├── applied_patterns.py # Applied pattern records
 │   ├── items.py            # 3D model catalog
-│   ├── users.py            # User management
-│   └── retexture.py        # Clothing retexturing
+│   └── users.py            # User management
 └── services/               # Business logic
-    ├── pattern_service.py  # AI pattern generation pipeline
-    └── retexture_service.py# AI clothing retexturing
+    └── pattern_service.py  # AI pattern generation pipeline
 
 ai_model/                   # AI/ML modules
 ├── config.py              # Model configuration & hyperparameters
-├── pipeline.py            # SD3 img2img & inpaint pipelines
+├── pipeline.py            # SD3 img2img pipeline
 ├── preprocessing.py       # Color extraction, image compositing
-├── postprocessing.py      # Denoising, SLIC segmentation
-└── segmentation.py        # SegFormer clothing segmentation
+└── postprocessing.py      # Denoising, SLIC segmentation
 
 test_model.py              # Interactive testing script
 check_gpu.py              # GPU availability checker
@@ -178,13 +173,6 @@ DELETE /api/collections/{id}         # Delete collection
 POST   /api/apply-pattern            # Apply pattern to GLB (download)
 POST   /api/apply-pattern-and-save   # Apply pattern & save to storage
 POST   /api/apply-uv                 # Generate UV maps for GLB
-```
-
-### Retexturing
-
-```
-POST   /api/retexture-clothes        # Apply pattern to clothing in photo
-POST   /api/retexture-outfit         # Apply pattern to clothing item
 ```
 
 ### Items (3D Models)
@@ -265,24 +253,7 @@ items (
 ```
 
 
-### 2. Clothing Retexturing (`/api/retexture-clothes`)
-
-```
-1. User uploads photo with person
-   ↓
-2. SegFormer segments upper-body clothing → binary mask
-   ↓
-3. Extract dominant colors from collection's base images
-   ↓
-4. Build prompt: "shirt with {colors} camo pattern..."
-   ↓
-5. SD3 inpainting: Regenerate only masked clothing region
-   ↓
-6. Return retextured PNG
-```
-
-
-### 3. Model Texturing (`/api/apply-pattern`)
+### 2. Model Texturing (`/api/apply-pattern`)
 
 ```
 1. User uploads GLB model + pattern image
@@ -300,4 +271,3 @@ items (
 
 - [CamoCam Frontend](../CamoCam) - Flutter app
 - [Stable Diffusion 3](https://huggingface.co/stabilityai/stable-diffusion-3-medium-diffusers)
-- [SegFormer](https://huggingface.co/models?other=segformer)

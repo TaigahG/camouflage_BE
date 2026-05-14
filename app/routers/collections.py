@@ -118,7 +118,7 @@ async def create_collection(
 @router.post("/{collection_id}/generate", response_model=schemas.CollectionResponse)
 async def regenerate_pattern(
     collection_id: int,
-    apply_segmentation: bool = False,
+    apply_segmentation: bool = True,
     db: Session = Depends(get_db),
     current_user: UserInfo = Depends(get_current_user),
 ):
@@ -193,6 +193,27 @@ def get_collection(collection_id: int, db:Session = Depends(get_db)):
     if not db_collection:
         raise HTTPException(status_code=404, detail="collection not found")
     return db_collection
+
+@router.patch("/{collection_id}", response_model=schemas.CollectionResponse)
+def rename_collection(
+    collection_id: int,
+    payload: schemas.CollectionUpdate,
+    db: Session = Depends(get_db),
+    current_user: UserInfo = Depends(get_current_user),
+):
+    """Rename a collection (title only)."""
+    db_collection = crud.get_collections(db, collection_id=collection_id)
+    if not db_collection:
+        raise HTTPException(status_code=404, detail="Collection not found")
+    if db_collection.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    new_title = payload.title.strip()
+    if not new_title:
+        raise HTTPException(status_code=400, detail="Title cannot be empty")
+
+    return crud.update_collection_title(db, collection_id, new_title)
+
 
 @router.delete("/{collection_id}", status_code=204)
 def delete_collection(

@@ -18,32 +18,17 @@ class AIConfig():
 
     #Denoising steps
     #More steps higher quality but slower. To fine an effective steps is: N_I_S * STRENGTH. Q: Why 50?
-    NUM_INFERENEC_STEPS: int = 30
+    NUM_INFERENEC_STEPS: int = 50
 
     #Guidance scale
     #To know how much the model follows the text prompt.
     GUIDANCE_SCALE: float = 0.0
 
-    # INPAINTING SETTINGS (for /retexture-* endpoints)
-    # Inpainting needs *different* defaults than img2img:
-    #  - higher strength so the masked region is fully regenerated
-    #  - non-zero guidance so the camo text prompt actually influences the result
-    INPAINT_STRENGTH: float = 0.70
-    # 15–20 steps is the sweet spot for SD3 inpaint on camo (which is high-frequency
-    # texture; further denoising barely helps). 15 ≈ 2× faster than 30.
-    INPAINT_NUM_INFERENCE_STEPS: int = 15
-    INPAINT_GUIDANCE_SCALE: float = 7.0
-    # Inpaint at a smaller resolution than the img2img generator. The masked
-    # region is resized in/out anyway, so 512² gives ~2× speedup over 768²
-    # with no visible loss for camo texture.
-    INPAINT_WIDTH: int = 512
-    INPAINT_HEIGHT: int = 512
-
     #IMAGE SETTINGS
     
     #Output dimensions
-    OUTPUT_WIDTH: int = 768
-    OUTPUT_HEIGHT: int = 768
+    OUTPUT_WIDTH: int = 1024
+    OUTPUT_HEIGHT: int = 1024
 
 
     #PREPROCESS SETTINGS

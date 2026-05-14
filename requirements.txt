@@ -8,8 +8,19 @@ pydantic==2.5.0
 pydantic-settings==2.1.0
 pillow==10.1.0
 supabase==2.3.0
+httpx
 open3d
 trimesh
+xatlas
 pygltflib
 numpy
+scipy
+scikit-learn
+scikit-image
 transformers
+--extra-index-url https://download.pytorch.org/whl/cu121
+torch==2.3.1+cu121
+diffusers
+accelerate
+sentencepiece
+protobuf

@@ -29,6 +29,14 @@ def update_collection_pattern(db:Session, collection_id: int, pattern_url:str) -
         db.commit()
         db.refresh(db_collection)
     return db_collection
+
+def update_collection_title(db: Session, collection_id: int, title: str) -> Optional[models.Collection]:
+    db_collection = get_collections(db, collection_id)
+    if db_collection:
+        db_collection.title = title
+        db.commit()
+        db.refresh(db_collection)
+    return db_collection
 def delete_collections(db:Session, collection_id:int):
     db_collection = get_collections(db, collection_id)
     if db_collection:

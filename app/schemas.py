@@ -23,6 +23,9 @@ class BaseImageResponse(BaseModel):
 class CollectionCreate(BaseModel):
     title: str
 
+class CollectionUpdate(BaseModel):
+    title: str
+
 class CollectionResponse(BaseModel):
     collection_id: int
     user_id: uuid.UUID  # UUID from auth.users

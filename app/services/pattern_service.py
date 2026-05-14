@@ -64,7 +64,7 @@ class PatternService:
     async def generate_pattern(
         self,
         image_urls: List[str],
-        apply_segmentation: bool = False
+        apply_segmentation: bool = True
     ) -> Optional[bytes]:
         """
         Run the full AI pipeline and return the pattern as raw bytes.

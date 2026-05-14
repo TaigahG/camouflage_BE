@@ -1,24 +1,16 @@
 """
 app/main.py
 
-WHAT CHANGED:
-    Added a 'lifespan' context manager that loads the AI model
-    when the server starts and cleans up when it stops.
-
-WHY LIFESPAN (not @app.on_event)?
-    FastAPI's @app.on_event("startup") is deprecated.
-    The modern approach is the 'lifespan' async context manager.
-    Everything BEFORE 'yield' runs at startup.
-    Everything AFTER 'yield' runs at shutdown.
+Loads the AI model at startup via a lifespan context manager and cleans
+up at shutdown.
 """
 
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
-from sqlalchemy import inspect
 from . import models
-from .routers import users, collections, items, images, trimesh_router, applied_patterns, retexture
+from .routers import users, collections, items, images, trimesh_router, applied_patterns
 
 
 @asynccontextmanager
@@ -33,16 +25,8 @@ async def lifespan(app: FastAPI):
         print("[WARNING] Pattern generation will be unavailable.")
         print("[WARNING] All other API endpoints will work normally.")
 
-    try:
-        from .services.retexture_service import retexture_service
-        retexture_service.preload()
-    except Exception as e:
-        print(f"[WARNING] Retexture preload failed: {e}")
-        print("[WARNING] /retexture-clothes will lazy-load on first request.")
+    yield
 
-    yield  
-
-    # ── SHUTDOWN ──
     print("[Server] Shutting down...")
 
 app = FastAPI(
@@ -51,7 +35,7 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
-    lifespan=lifespan, 
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -67,7 +51,6 @@ app.include_router(items.router, prefix="/api")
 app.include_router(images.router, prefix="/api")
 app.include_router(trimesh_router.router, prefix="/api")
 app.include_router(applied_patterns.router, prefix="/api")
-app.include_router(retexture.router, prefix="/api")
 
 @app.get("/")
 def root():
