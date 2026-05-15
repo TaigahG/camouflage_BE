@@ -1,26 +1,40 @@
+--extra-index-url https://download.pytorch.org/whl/cu118
+
+# Core API
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
-sqlalchemy==2.0.23
-psycopg2-binary==2.9.9
-python-dotenv==1.0.0
 python-multipart==0.0.6
+python-dotenv==1.0.0
+httpx==0.24.1
+
+# Validation / settings
 pydantic==2.5.0
 pydantic-settings==2.1.0
-pillow==10.1.0
+
+# Database
+sqlalchemy==2.0.23
+psycopg2-binary==2.9.9
+
+# Supabase
 supabase==2.3.0
-httpx
-open3d
-trimesh
-xatlas
-pygltflib
-numpy
-scipy
-scikit-learn
-scikit-image
-transformers
---extra-index-url https://download.pytorch.org/whl/cu121
-torch==2.3.1+cu121
-diffusers
-accelerate
-sentencepiece
-protobuf
+
+# Image processing
+pillow==12.2.0
+
+# Scientific computing
+numpy==1.26.4
+scipy==1.17.1
+scikit-learn==1.8.0
+scikit-image==0.26.0
+
+# 3D mesh processing
+trimesh==4.11.2
+pygltflib==1.16.5
+xatlas==0.0.11
+
+# AI / ML — torch wheel resolved via extra index above
+torch==2.7.1+cu118
+transformers==5.8.0
+diffusers==0.38.0
+accelerate==1.13.0
+protobuf==4.23.4
