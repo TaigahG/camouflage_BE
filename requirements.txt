@@ -22,7 +22,7 @@ supabase==2.3.0
 pillow==12.2.0
 
 # Scientific computing
-numpy==1.26.4
+numpy==2.2.5
 scipy==1.17.1
 scikit-learn==1.8.0
 scikit-image==0.26.0
