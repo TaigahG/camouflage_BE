@@ -12,14 +12,13 @@ services:
     volumes:
       - hf-models:/models
     restart: unless-stopped
-    # Uncomment to expose host GPU (requires NVIDIA Container Toolkit)
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: all
-    #           capabilities: [gpu]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
 
 volumes:
   hf-models:
