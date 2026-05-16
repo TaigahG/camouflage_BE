@@ -108,6 +108,7 @@ async def apply_pattern(
 async def apply_pattern_and_save(
     model: UploadFile = File(..., description="GLB model file (.glb)"),
     collection_id: int = Form(..., description="Collection ID"),
+    title: Optional[str] = Form(None, description="Model name/title"),
     db: Session = Depends(get_db),
     current_user: UserInfo = Depends(get_current_user),
 ):
@@ -117,6 +118,7 @@ async def apply_pattern_and_save(
     Args:
         model: GLB model file
         collection_id: Collection/Pattern ID
+        title: Model name/title
         db: Database session
         current_user: Current authenticated user
     
@@ -124,6 +126,7 @@ async def apply_pattern_and_save(
         AppliedPatternResponse with the created applied pattern record
     """
     user_id = current_user.id
+    print(f"[DEBUG] Received request - collection_id={collection_id}, title={title!r}")
 
     # Validate model file
     if not model.filename.lower().endswith(".glb"):
@@ -186,12 +189,15 @@ async def apply_pattern_and_save(
             glb_bytes = f.read()
 
     # Create applied pattern record first to get the ID
+    print(f"[DEBUG] Creating applied pattern with title={title!r}")
     db_applied = crud.create_applied_pattern(
         db=db,
         user_id=user_id,
         collection_id=collection_id,
         applied_model_url="placeholder",  # Will be updated after upload
+        title=title,
     )
+    print(f"[DEBUG] Created applied pattern - applied_id={db_applied.applied_id}, title={db_applied.title!r}")
 
     # Upload the textured model to storage
     try:

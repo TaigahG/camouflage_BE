@@ -56,6 +56,9 @@ class AppliedPatternCreate(BaseModel):
     item_id: int
     title: Optional[str] = None
 
+class AppliedPatternUpdate(BaseModel):
+    title: Optional[str] = None
+
 class AppliedPatternResponse(BaseModel):
     applied_id: int
     user_id: uuid.UUID

@@ -114,6 +114,14 @@ def get_collection_applied_patterns(db: Session, collection_id: int) -> List[mod
         models.AppliedPattern.collection_id == collection_id
     ).order_by(models.AppliedPattern.created_at.desc()).all()
 
+def update_applied_pattern_title(db: Session, applied_id: int, title: str) -> Optional[models.AppliedPattern]:
+    db_applied = get_applied_pattern(db, applied_id)
+    if db_applied:
+        db_applied.title = title
+        db.commit()
+        db.refresh(db_applied)
+    return db_applied
+
 def delete_applied_pattern(db: Session, applied_id: int) -> bool:
     db_applied = get_applied_pattern(db, applied_id)
     if db_applied:
