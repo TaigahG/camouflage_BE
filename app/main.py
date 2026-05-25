@@ -10,7 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
 from . import models
-from .routers import users, collections, items, images, trimesh_router, applied_patterns
+from .routers import users, collections, images, trimesh_router, applied_patterns
 
 
 @asynccontextmanager
@@ -47,7 +47,7 @@ app.add_middleware(
 )
 app.include_router(users.router, prefix="/api")
 app.include_router(collections.router, prefix="/api")
-app.include_router(items.router, prefix="/api")
+
 app.include_router(images.router, prefix="/api")
 app.include_router(trimesh_router.router, prefix="/api")
 app.include_router(applied_patterns.router, prefix="/api")

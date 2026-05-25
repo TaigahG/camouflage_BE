@@ -73,7 +73,11 @@ async def apply_pattern(
         for name, mesh in geometries.items():
             if not hasattr(mesh.visual, "uv") or mesh.visual.uv is None:
                 continue
-            mesh.visual.material = trimesh.visual.material.SimpleMaterial(image=texture)
+            mesh.visual.material = trimesh.visual.material.PBRMaterial(
+                baseColorTexture=texture,
+                metallicFactor=0.0,
+                roughnessFactor=1.0,
+            )
             applied += 1
 
         if applied == 0:
@@ -169,7 +173,11 @@ async def apply_pattern_and_save(
         for name, mesh in geometries.items():
             if not hasattr(mesh.visual, "uv") or mesh.visual.uv is None:
                 continue
-            mesh.visual.material = trimesh.visual.material.SimpleMaterial(image=texture)
+            mesh.visual.material = trimesh.visual.material.PBRMaterial(
+                baseColorTexture=texture,
+                metallicFactor=0.0,
+                roughnessFactor=1.0,
+            )
             applied += 1
 
         if applied == 0:

@@ -37,23 +37,8 @@ class CollectionResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class ItemCreate(BaseModel):
-    item_type: str
-    item_3d_model_url: str
-    thumbnail_url: Optional[str]
-
-class ItemResponse(BaseModel):
-    item_id: int
-    item_type: str
-    item_3d_model_url: str
-    thumbnail_url: Optional[str]
-
-    class Config:
-        from_attributes = True
-
 class AppliedPatternCreate(BaseModel):
     collection_id: int
-    item_id: int
     title: Optional[str] = None
 
 class AppliedPatternUpdate(BaseModel):
@@ -63,7 +48,6 @@ class AppliedPatternResponse(BaseModel):
     applied_id: int
     user_id: uuid.UUID
     collection_id: int
-    item_id: Optional[int]
     applied_model_url: str
     thumbnail_url: Optional[str]
     title: Optional[str]

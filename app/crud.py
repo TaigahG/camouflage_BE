@@ -59,25 +59,6 @@ def create_image(db:Session, collection_id:int, img:str, order:int):
 def get_collection_images(db:Session, collection_id:int):
     return db.query(models.BaseImage).filter(models.BaseImage.collection_id == collection_id).order_by(models.BaseImage.upload_order).all()
 
-#items
-def create_item(db: Session, item: schemas.ItemCreate):
-    db_item = models.Item(**item.dict())
-    db.add(db_item)
-    db.commit()
-    db.refresh(db_item)
-    return db_item
-def get_items(db: Session):
-    return db.query(models.Item).all()
-def get_item(db: Session, item_id: int):
-    return db.query(models.Item).filter(models.Item.item_id == item_id).first()
-def delete_item(db: Session, item_id: int):
-    db_item = get_item(db, item_id)
-    if db_item:
-        db.delete(db_item)
-        db.commit()
-        return True
-    return False
-
 # Applied Patterns
 def create_applied_pattern(
     db: Session,
@@ -86,12 +67,10 @@ def create_applied_pattern(
     applied_model_url: str,
     thumbnail_url: Optional[str] = None,
     title: Optional[str] = None,
-    item_id: Optional[int] = None,
 ) -> models.AppliedPattern:
     db_applied = models.AppliedPattern(
         user_id=user_id,
         collection_id=collection_id,
-        item_id=item_id,
         applied_model_url=applied_model_url,
         thumbnail_url=thumbnail_url,
         title=title,

@@ -31,26 +31,17 @@ class BaseImage(Base):
 
     collection = relationship("Collection", back_populates="base_images")
 
-class Item(Base):
-    __tablename__ = "items"
-    
-    item_id = Column(Integer, primary_key=True, index=True)
-    item_type = Column(String, nullable=False)
-    item_3d_model_url = Column(String, nullable=False)
-    thumbnail_url = Column(String, nullable=True)
-
 class AppliedPattern(Base):
     __tablename__ = "applied_patterns"
-    
+
     applied_id = Column(Integer, primary_key=True, index=True)
     user_id = Column(UUID(as_uuid=True), nullable=False, index=True)  # UUID from auth.users
     collection_id = Column(Integer, ForeignKey("collections.collection_id", ondelete="SET NULL"), nullable=True)
-    item_id = Column(Integer, ForeignKey("items.item_id", ondelete="SET NULL"), nullable=True)  # Can be null if item deleted
-    
-    applied_model_url = Column(String, nullable=False)  
-    thumbnail_url = Column(String, nullable=True) 
-    
-    title = Column(String, nullable=True) 
+
+    applied_model_url = Column(String, nullable=False)
+    thumbnail_url = Column(String, nullable=True)
+
+    title = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
-    
+
     collection = relationship("Collection", back_populates="applied_patterns")
