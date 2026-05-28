@@ -40,7 +40,7 @@ FastAPI-based backend for the CamoCam AI-powered camouflage pattern generator. H
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/camocam-be.git
+git clone https://github.com/TaigahG/camocam-be.git
 cd camocam-be
 ```
 
