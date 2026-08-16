@@ -33,9 +33,8 @@ class CamouflagePipeline:
 
         pipe = pipe.to(config.DEVICE)
 
-        # Attention slicing saves memory but kills speed on high-VRAM GPUs
-        # RTX 3070 has 8GB, so we don't need it
-        pipe.enable_attention_slicing()  # DISABLED for speed
+
+        pipe.enable_attention_slicing() 
 
         print(f"Model loaded successfully on {config.DEVICE}")
 
@@ -62,11 +61,6 @@ class CamouflagePipeline:
             input_image = input_image.resize(target_size, Image.LANCZOS)
 
         input_image = input_image.convert("RGB")
-
-        print(f"[AI] Generating pattern...")
-        print(f"[AI]   Strength: {strength}")
-        print(f"[AI]   Steps: {num_steps} (effective: {int(num_steps * strength)})")
-        print(f"[AI]   Guidance: {guidance_scale}")
 
         with torch.no_grad():
             result = self.pipe(
